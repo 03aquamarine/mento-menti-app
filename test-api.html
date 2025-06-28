@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <div>
+        <h2>Login Test</h2>
+        <button id="loginBtn">Test Login</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = "http://localhost:8080/api";
+        
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            console.log('Login test started');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        email: "flowtest@example.com",
+                        password: "StrongPass123"
+                    }),
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.token) {
+                    // 토큰으로 사용자 정보 가져오기
+                    const userResponse = await fetch(`${API_BASE_URL}/me`, {
+                        headers: {
+                            "Authorization": `Bearer ${data.token}`,
+                            "Content-Type": "application/json",
+                        }
+                    });
+                    
+                    const userData = await userResponse.json();
+                    console.log('User data:', userData);
+                    
+                    document.getElementById('loginResult').innerHTML = 
+                        `<pre>Token: ${data.token}\nUser: ${JSON.stringify(userData, null, 2)}</pre>`;
+                } else {
+                    document.getElementById('loginResult').innerHTML = 
+                        `<pre>Error: ${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                console.error('Login test error:', error);
+                document.getElementById('loginResult').innerHTML = 
+                    `<pre>Network Error: ${error.message}</pre>`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
       if (token) {
         try {
           const response = await apiService.getProfile();
-          dispatch({ type: "SET_USER", payload: response.user });
+          dispatch({ type: "SET_USER", payload: response });
         } catch (error) {
           console.error("Auth check failed:", error);
           apiService.logout();
@@ -51,10 +51,13 @@ export function AuthProvider({ children }) {
   const login = async (credentials) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
+      console.log("로그인 시도:", credentials);
       const response = await apiService.login(credentials);
+      console.log("로그인 응답:", response);
       dispatch({ type: "SET_USER", payload: response.user });
       return response;
     } catch (error) {
+      console.error("로그인 에러:", error);
       dispatch({ type: "SET_ERROR", payload: error.message });
       throw error;
     }
@@ -63,10 +66,13 @@ export function AuthProvider({ children }) {
   const register = async (userData) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
+      console.log("회원가입 시도:", userData);
       const response = await apiService.register(userData);
+      console.log("회원가입 응답:", response);
       dispatch({ type: "SET_USER", payload: response.user });
       return response;
     } catch (error) {
+      console.error("회원가입 에러:", error);
       dispatch({ type: "SET_ERROR", payload: error.message });
       throw error;
     }
@@ -80,7 +86,7 @@ export function AuthProvider({ children }) {
   const updateProfile = async (profileData) => {
     try {
       const response = await apiService.updateProfile(profileData);
-      dispatch({ type: "SET_USER", payload: response.user });
+      dispatch({ type: "SET_USER", payload: response });
       return response;
     } catch (error) {
       dispatch({ type: "SET_ERROR", payload: error.message });

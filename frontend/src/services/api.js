@@ -33,14 +33,19 @@ class APIService {
 
   // Authentication APIs
   async register(userData) {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
       method: "POST",
       headers: this.getAuthHeaders(),
       body: JSON.stringify(userData),
     });
     const data = await this.handleResponse(response);
-    if (data.token) {
-      this.setToken(data.token);
+    
+    // 회원가입 성공 시 자동 로그인
+    if (data.message) {
+      return await this.login({
+        email: userData.email,
+        password: userData.password
+      });
     }
     return data;
   }
@@ -52,8 +57,22 @@ class APIService {
       body: JSON.stringify(credentials),
     });
     const data = await this.handleResponse(response);
+    
     if (data.token) {
       this.setToken(data.token);
+      
+      // 토큰 설정 후 사용자 정보 가져오기
+      try {
+        const userResponse = await this.getProfile();
+        return {
+          token: data.token,
+          user: userResponse
+        };
+      } catch (userError) {
+        // 사용자 정보 가져오기 실패 시 토큰 제거
+        this.setToken(null);
+        throw new Error("Failed to get user information: " + userError.message);
+      }
     }
     return data;
   }

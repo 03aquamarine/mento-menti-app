@@ -5,10 +5,13 @@ import "./Profile.css";
 
 function Profile() {
   const { user, updateProfile } = useAuth();
+  
+  console.log("Profile 컴포넌트 - 사용자 정보:", user);
+  
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    bio: user?.bio || "",
-    skills: user?.skills ? user.skills.join(", ") : "",
+    name: user?.profile?.name || "",
+    bio: user?.profile?.bio || "",
+    skills: user?.profile?.skills ? user.profile.skills.join(", ") : "",
     experience: user?.experience || "",
     hourlyRate: user?.hourlyRate || "",
   });
@@ -112,16 +115,16 @@ function Profile() {
           {/* 프로필 이미지 섹션 */}
           <div className="profile-image-section">
             <div className="profile-image-container">
-              {user.profileImage ? (
+              {user.profile?.imageUrl && !user.profile.imageUrl.startsWith('https://placehold.co') ? (
                 <img
-                  src={`http://localhost:3001${user.profileImage}`}
+                  src={user.profile.imageUrl}
                   alt="Profile"
                   id="profile-photo"
                   className="profile-image"
                 />
               ) : (
                 <div className="profile-image-placeholder" id="profile-photo">
-                  <span>{user.name.charAt(0).toUpperCase()}</span>
+                  <span>{user.profile?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
                 </div>
               )}
               <button

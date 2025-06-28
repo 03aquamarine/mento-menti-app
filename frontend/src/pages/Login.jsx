@@ -27,9 +27,13 @@ function Login() {
     setError("");
 
     try {
-      await login(formData);
+      console.log("로그인 폼 데이터:", formData);
+      const result = await login(formData);
+      console.log("로그인 성공, 결과:", result);
+      console.log("홈으로 이동합니다");
       navigate("/");
     } catch (error) {
+      console.error("로그인 실패:", error);
       setError(error.message);
     } finally {
       setLoading(false);

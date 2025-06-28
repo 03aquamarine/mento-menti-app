@@ -4,20 +4,33 @@ import { useAuth } from "../contexts/AuthContext";
 import "./Home.css";
 
 function Home() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  console.log("Home 컴포넌트 렌더링:", { user, loading });
+
   useEffect(() => {
+    console.log("Home useEffect:", { user, loading });
     // 인증된 사용자는 프로필 페이지로 리다이렉트
-    if (user) {
+    if (user && !loading) {
+      console.log("프로필 페이지로 리다이렉트");
       navigate("/profile");
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
-  // 인증되지 않은 사용자에게만 홈페이지 표시
-  if (user) {
+  // 로딩 중일 때
+  if (loading) {
+    console.log("로딩 상태");
     return <div className="loading">Loading...</div>;
   }
+
+  // 인증된 사용자인 경우 (리다이렉트 중)
+  if (user) {
+    console.log("사용자 인증됨, 리다이렉트 중");
+    return <div className="loading">Redirecting...</div>;
+  }
+
+  console.log("인증되지 않은 사용자, 홈 페이지 표시");
 
   return (
     <div className="home">

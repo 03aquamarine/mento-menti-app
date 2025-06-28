@@ -67,9 +67,13 @@ function Register() {
         }
       }
 
-      await register(userData);
+      console.log("회원가입 데이터:", userData);
+      const result = await register(userData);
+      console.log("회원가입 성공, 결과:", result);
+      console.log("홈으로 이동합니다");
       navigate("/");
     } catch (error) {
+      console.error("회원가입 실패:", error);
       setError(error.message);
     } finally {
       setLoading(false);
