@@ -21,10 +21,18 @@ function MentorList() {
     try {
       setLoading(true);
       const response = await apiService.getMentors(filters);
-      setMentors(response.mentors);
-      setPagination(response.pagination);
+      // 백엔드에서 배열을 직접 반환하므로 response 자체가 멘토 배열
+      setMentors(Array.isArray(response) ? response : []);
+      // 현재 백엔드에서 pagination을 지원하지 않으므로 기본값 설정
+      setPagination({ 
+        currentPage: 1, 
+        totalPages: 1, 
+        total: Array.isArray(response) ? response.length : 0 
+      });
     } catch (error) {
+      console.error("멘토 목록 조회 오류:", error);
       setError(error.message);
+      setMentors([]); // 오류 시 빈 배열로 설정
     } finally {
       setLoading(false);
     }
@@ -167,20 +175,23 @@ function MentorList() {
 
       {/* 멘토 목록 */}
       <div className="mentors-grid">
-        {mentors.map((mentor) => (
-          <div key={mentor.id} className="mentor-card mentor">
-            <div className="mentor-image">
-              {mentor.profileImage ? (
-                <img
-                  src={`http://localhost:3001${mentor.profileImage}`}
-                  alt={mentor.name}
-                />
-              ) : (
-                <div className="mentor-avatar">
-                  {mentor.name.charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
+        {Array.isArray(mentors) && mentors.length > 0 ? (
+          mentors.map((mentor) => (
+            <div key={mentor.id} className="mentor-card mentor">
+              <div className="mentor-image">
+                {mentor.profile?.imageUrl ? (
+                  <img
+                    src={mentor.profile.imageUrl.startsWith('http') 
+                      ? mentor.profile.imageUrl 
+                      : `http://localhost:8080${mentor.profile.imageUrl}`}
+                    alt={mentor.profile?.name || 'Mentor'}
+                  />
+                ) : (
+                  <div className="mentor-avatar">
+                    {(mentor.profile?.name || 'M').charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
 
             <div className="mentor-info">
               <h3 className="mentor-name">{mentor.name}</h3>
@@ -233,7 +244,12 @@ function MentorList() {
               )}
             </div>
           </div>
-        ))}
+        ))
+        ) : (
+          <div className="no-mentors">
+            {loading ? "멘토 목록을 불러오는 중..." : "등록된 멘토가 없습니다."}
+          </div>
+        )}
       </div>
 
       {mentors.length === 0 && !loading && (
