@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "./Auth.css";
 
@@ -19,7 +19,6 @@ function Register() {
   const [error, setError] = useState("");
 
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -39,8 +38,22 @@ function Register() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("비밀번호는 최소 6자 이상이어야 합니다.");
+    if (formData.password.length < 8) {
+      setError("비밀번호는 최소 8자 이상이어야 합니다.");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length > 128) {
+      setError("비밀번호는 최대 128자까지 입력 가능합니다.");
+      setLoading(false);
+      return;
+    }
+
+    // 비밀번호 복잡성 검증 (소문자, 대문자, 숫자 각각 포함)
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+    if (!passwordPattern.test(formData.password)) {
+      setError("비밀번호는 소문자, 대문자, 숫자를 각각 최소 1개씩 포함해야 합니다.");
       setLoading(false);
       return;
     }
@@ -70,8 +83,10 @@ function Register() {
       console.log("회원가입 데이터:", userData);
       const result = await register(userData);
       console.log("회원가입 성공, 결과:", result);
-      console.log("홈으로 이동합니다");
-      navigate("/");
+      console.log(
+        "회원가입 성공! PublicRoute가 자동으로 홈으로 리다이렉트합니다.",
+      );
+      // navigate("/")를 제거 - PublicRoute에서 자동으로 리다이렉트됨
     } catch (error) {
       console.error("회원가입 실패:", error);
       setError(error.message);
@@ -140,8 +155,11 @@ function Register() {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="최소 6자 이상"
+              placeholder="8자 이상, 대소문자+숫자 포함"
             />
+            <small className="form-help">
+              8-128자, 소문자/대문자/숫자 각각 최소 1개씩 포함
+            </small>
           </div>
 
           <div className="form-group">
@@ -212,7 +230,12 @@ function Register() {
             </>
           )}
 
-          <button type="submit" id="signup" className="auth-btn" disabled={loading}>
+          <button
+            type="submit"
+            id="signup"
+            className="auth-btn"
+            disabled={loading}
+          >
             {loading ? "가입 중..." : "회원가입"}
           </button>
         </form>
